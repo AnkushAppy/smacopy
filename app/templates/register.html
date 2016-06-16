@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <a href="/login">Already registered. Login here</a>
+    <h1>Sign Up</h1>
+    <form action="/register" method="POST" name="register">
+        {{ form.hidden_tag()}}
+        <p>
+            Please enter needed data
+            <br>
+            {{form.username.label()}}
+            {{form.username()}}
+            {% for error in form.username.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+            {{form.email.label()}}
+            {{form.email}}
+            {% for error in form.email.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+            {{form.password.label()}}
+            {{form.password}}
+            {% for error in form.password.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+            {{form.confirm.label()}}
+            {{form.confirm}}
+            {% for error in form.confirm.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+
+        </p>
+        <p>
+            <input type="submit" value="Sign Up" name="register">
+        </p>
+
+
+    </form>
+
+{% endblock %}

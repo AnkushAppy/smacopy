@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <a href="/register">New here! Sign Up.</a>
+    <h1>Sign In</h1>
+    <form action="/login" method="POST" name="login">
+        {{ form.hidden_tag()}}
+        <p>
+            Please Enter Login Credentials<br>
+            {{form.username.label()}}
+            {{form.username()}}
+            {% for error in form.username.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+            {{form.password.label()}}
+            {{form.password}}
+            {% for error in form.password.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+
+        </p>
+        <p>
+            {{form.remember_me}} Remember Me
+        </p>
+            <input type="submit" value="Sign In" name="Login">
+        </p>
+
+
+    </form>
+
+{% endblock %}
