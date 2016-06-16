@@ -1,17 +1,19 @@
 from flask_wtf import Form
 from wtforms import StringField, PasswordField, BooleanField
-from wtforms.validators import DataRequired, Email,EqualTo, ValidationError, Length
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length, Regexp
 from models import User
 
 
 def user_exist(self,field):
-    username_obj = User.query.get(field.data)
+    data = str(field.data)
+    username_obj = User.query.get(data.strip())
     if username_obj:
         raise ValidationError('User with the name already exist')
 
 
 def email_exist(self, field):
-    email_obj = User.query.get(field.data)
+    data = str(field.data)
+    email_obj = User.query.get(data.strip())
     if email_obj:
         raise ValidationError('email already exist')
 
@@ -33,7 +35,12 @@ class RegistrationForm(Form):
                            validators=[
                                DataRequired(),
                                Length(max=64),
-                               user_exist
+                               user_exist,
+                               Regexp(
+                                   r'^[a-zA-Z0-9_]+$',
+                                   message=("Username should be at least one word and can only contain "
+                                            "Alphabets, Numbers and underscores")
+                               )
                            ])
     email = StringField('Email',
                         validators=[

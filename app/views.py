@@ -20,6 +20,7 @@ def login():
     if form.validate_on_submit() and request.method == 'POST':
         #flash('Login requested for username = "%s", remember me="%s"')%(form.username.data,str(form.remember_me.data))
         username = form.username.data
+        username = username.strip()
         password = form.password.data
         username_obj = models.User.query.get(username)
 
