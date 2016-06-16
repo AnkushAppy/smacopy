@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
+	<a href="/user" name="Home">
+		Home
+	</a>
+|
     <a href="/logout" name="logout" >
         Logout
     </a>
@@ -8,14 +12,28 @@
     <p>
         {% if relation %}
         	{% if relation == 'New' %}
-        		You are visiting {{ username_obj.username }}!!
-        		 email: {{ username_obj.email}}. Current status: <a href="/user/add/{{username_obj.username}}">Add Friend</a>|Action taken by: {{relation.action_username}}
+				You are visiting {{ username_obj.username }}!! email: {{ username_obj.email}}. <br>
+				status: <a href="/user/add/{{username_obj.username}}">Add Friend</a>
         	{% elif relation.status == 'Accepted' %}
-        		You are visiting {{ username_obj.username }}!! email: {{ username_obj.email}}. Current status: {{relation.status}}|Action taken by: {{relation.action_username}}
+        		You are visiting {{ username_obj.username }}!! email: {{ username_obj.email}}.<br>
+				Current status: {{relation.status}} | <a href="/user/unfriend/{{username_obj.username}}">Unfriend</a><br>
+				Action taken by: {{relation.action_username}}
             {% elif relation.status == 'Rejected' %}
-        		You are visiting {{ username_obj.username }}!! email: {{ username_obj.email}}. Current status: {{relation.status}}|Action taken by: {{relation.action_username}}
-        	{% elif relation.status == 'Pending' %}
-        		You are visiting {{ username_obj.username }}!! email: {{ username_obj.email}}. Current status: {{relation.status}}|Action taken by: {{relation.action_username}}	
+				You are visiting {{ username_obj.username }}!! email: {{ username_obj.email}}. <br>
+				Current status: {{relation.status}} <a href="/user/add/{{username_obj.username}}">Add Friend</a><br>
+				Action taken by: {{relation.action_username}}
+        	{% elif relation.status == 'pending' %}
+				You are visiting {{ username_obj.username }}!! email: {{ username_obj.email}}.
+				Current status: {{relation.status}} <br>
+				Action taken by: {{relation.action_username}} |
+					{% if relation.action_username != username %}
+						<a href="/user/add/{{username_obj.username}}">Confirm</a> |
+						<a href="/user/reject/{{username_obj.username}}">Reject</a>
+					{% endif %}
+			{% else %}
+				You are visiting {{ username_obj.username }}!! email: {{ username_obj.email}}.
+				Current status: {{relation.status}}<br>
+				Action taken by: {{relation.action_username}}
         	{% endif %}
         {% else %}
         	Hello {{ username_obj.username }}!! Your email: {{ username_obj.email}}
@@ -30,17 +48,21 @@
     {% endfor %}
     {% for frnd in frndlist2 %}
 		{% if frnd.status == 'Accepted' %}
-			<li>{{ frnd.first_username}}</li>
+			<li><a href="/user/{{ frnd.first_username}}">{{ frnd.first_username}}</a></li>
 		{% endif %}
     {% endfor %}
     
     <hr>
     
     {% if relation == None %}
-    <B>Confirm</B>
+    <B>Confirm friend request</B>
 	    {% for frnd in frndlist2 %}
 			{% if frnd.status == 'pending' %}
-				<li>{{ frnd.first_username}}  | <a href="/user/add/{{frnd.first_username}}">Confirm Friend</a></li>
+				<li><a href="/user/{{ frnd.first_username}}">{{ frnd.first_username}}</a>
+					| <a href="/user/add/{{frnd.first_username}}">Confirm</a>
+					| <a href="/user/reject/{{frnd.first_username}}">Reject</a>
+
+				</li>
 			{% endif %}
 	    {% endfor %}
 	{% endif %}
