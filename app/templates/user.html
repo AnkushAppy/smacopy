@@ -6,6 +6,42 @@
     </a>
 
     <p>
-        Hello {{username}}!!
-    </p>
+        {% if relation %}
+        	{% if relation == 'New' %}
+        		You are visiting {{ username_obj.username }}!!
+        		 email: {{ username_obj.email}}. Current status: <a href="/user/add/{{username_obj.username}}">Add Friend</a>|Action taken by: {{relation.action_username}}
+        	{% elif relation.status == 'Accepted' %}
+        		You are visiting {{ username_obj.username }}!! email: {{ username_obj.email}}. Current status: {{relation.status}}|Action taken by: {{relation.action_username}}
+            {% elif relation.status == 'Rejected' %}
+        		You are visiting {{ username_obj.username }}!! email: {{ username_obj.email}}. Current status: {{relation.status}}|Action taken by: {{relation.action_username}}
+        	{% elif relation.status == 'Pending' %}
+        		You are visiting {{ username_obj.username }}!! email: {{ username_obj.email}}. Current status: {{relation.status}}|Action taken by: {{relation.action_username}}	
+        	{% endif %}
+        {% else %}
+        	Hello {{ username_obj.username }}!! Your email: {{ username_obj.email}}
+        {% endif %}
+    </p>	
+    <hr>
+    <B>Friends</B>
+    {% for frnd in frndlist1 %}
+    	{% if frnd.status == 'Accepted' %}
+    		<li><a href="/user/{{ frnd.second_username}}">{{frnd.second_username}}</a></li>
+    	{% endif %}
+    {% endfor %}
+    {% for frnd in frndlist2 %}
+		{% if frnd.status == 'Accepted' %}
+			<li>{{ frnd.first_username}}</li>
+		{% endif %}
+    {% endfor %}
+    
+    <hr>
+    
+    {% if relation == None %}
+    <B>Confirm</B>
+	    {% for frnd in frndlist2 %}
+			{% if frnd.status == 'pending' %}
+				<li>{{ frnd.first_username}}  | <a href="/user/add/{{frnd.first_username}}">Confirm Friend</a></li>
+			{% endif %}
+	    {% endfor %}
+	{% endif %}
 {% endblock %}

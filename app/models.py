@@ -17,6 +17,8 @@ class User(db.Model):
     friends_s = db.relationship('Friend', backref='user_s', lazy='dynamic', foreign_keys='Friend.second_username')
     friends_a = db.relationship('Friend', backref='user_a', lazy='dynamic', foreign_keys='Friend.action_username')
 
+
+
     def __repr__(self):
         return '<User: %s Email: %s>' % (self.username,self.email)
 

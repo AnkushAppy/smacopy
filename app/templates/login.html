@@ -7,12 +7,17 @@
         {{ form.hidden_tag()}}
         <p>
             Please Enter Login Credentials<br>
-            {{form.username.label()}}
-            {{form.username()}}
-            {% for error in form.username.errors %}
+            <div>
+                {{form.username.label()}}
+                <br>
+                {{form.username()}}
+                {% for error in form.username.errors %}
                 <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}<br>
+                {% endfor %}
+                </div>
+                <br>
             {{form.password.label()}}
+            <br>
             {{form.password}}
             {% for error in form.password.errors %}
                 <span style="color: red;">[{{ error }}]</span>
