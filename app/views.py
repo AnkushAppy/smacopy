@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, request, session
 from app import app, db
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, MessageForm
 import models
 import datetime
 from datetime import timedelta
@@ -76,6 +76,9 @@ def user():
     username_obj = models.User.query.get(username)
     frndlist1 = username_obj.friends_f
     frndlist2 = username_obj.friends_s
+    msg_obj1 = models.Message.query.filter_by(first_username=username)
+    msg_obj2 = models.Message.query.filter_by(second_username=username)
+    msg_all = msg_obj1.union(msg_obj2).order_by(models.Message.timestamp)
     relation = None
     return render_template('user.html',
                            title=title,
@@ -83,7 +86,7 @@ def user():
                            frndlist1 = frndlist1,
                            frndlist2 = frndlist2,
                            relation=relation,
-                           username=username)
+                           username=username,msg_all=msg_all)
 
 
 @app.route('/user/<user_name>', methods=['GET','POST'])
@@ -101,15 +104,18 @@ def profile(user_name):
                                                     second_username=username).first()
         if relation:
             username_obj = models.User.query.get(user_name)
+            my_obj = models.User.query.get(username)
             frndlist1 = username_obj.friends_f
             frndlist2 = username_obj.friends_s
+            msg_obj1 = models.Message.query.filter_by(first_username=username,second_username=user_name)
+            msg_obj2 = models.Message.query.filter_by(first_username=user_name,second_username=username)
             return render_template('user.html',
                                    title=title,
                                    username_obj = username_obj,
                                    frndlist1 = frndlist1,
                                    frndlist2 = frndlist2,
                                    relation=relation,
-                                   username=username)
+                                   username=username,msg_obj2=msg_obj2,msg_obj1=msg_obj1)
         else:
             new = 'New'
             username_obj = models.User.query.get(user_name)
@@ -181,6 +187,50 @@ def unfriend(user_name):
     db.session.delete(relation)
     db.session.commit()
     return redirect('/user/%s'%user_name)
+
+@app.route('/user/<user_name>/message',methods=['GET','POST'])
+def message(user_name):
+    form = MessageForm()
+    username = session['username']
+    username_obj = models.User.query.get(user_name)
+    user_obj = models.User.query.get(username)
+    if not username_obj:
+        redirect('/user')
+    if not user_obj:
+        redirect('/user')
+    if user_name == username:
+        redirect('/user')
+
+    msg_obj1 = models.Message.query.filter_by(first_username=username, second_username=user_name)
+    msg_obj2 = models.Message.query.filter_by(first_username=user_name, second_username=username)
+    msg_all = msg_obj1.union(msg_obj2).order_by(models.Message.timestamp).limit(10)
+
+    frndlist1 = user_obj.friends_f
+    frndlist2 = user_obj.friends_s
+    frnd_all = frndlist1.union(frndlist2).order_by(models.Friend.timestamp)
+    if form.validate_on_submit() and request.method == 'POST':
+        msg = models.Message(first_username=username, second_username=user_name, chat=form.message.data,
+                             timestamp=datetime.datetime.utcnow(), chat_by=username)
+        db.session.add(msg)
+        db.session.commit()
+
+        return render_template('message.html',
+                               username_obj=username_obj,
+                               username=username,
+                               msg_all=msg_all,
+                               relation=None,
+                               form=form)
+
+    return render_template('message.html',
+                           username_obj=username_obj,
+                           username=username,
+                           msg_all=msg_all,
+                           relation=None,
+                           form=form)
+
+
+
+
 
 
 

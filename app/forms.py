@@ -46,7 +46,8 @@ class RegistrationForm(Form):
                         validators=[
                             DataRequired(),
                             Email(),
-                            email_exist
+                            email_exist,
+                            Length(max=64)
                         ]
 
     )
@@ -54,8 +55,17 @@ class RegistrationForm(Form):
                        validators=[
                            DataRequired(),
                            EqualTo('confirm',message='Password must match'),
-                           Length(min=5)
+                           Length(min=5, max=64)
                        ])
     confirm = PasswordField('Confirm Password',
                           validators=[DataRequired()])
+
+
+class MessageForm(Form):
+    message = StringField('Message',
+                          validators=[DataRequired(),
+                                      Length(max=140)
+                                      ]
+                          )
+
 

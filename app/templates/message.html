@@ -17,9 +17,7 @@
         	{% elif relation.status == 'Accepted' %}
         		You are visiting {{ username_obj.username }}!! email: {{ username_obj.email}}.<br>
 				Current status: {{relation.status}} | <a href="/user/unfriend/{{username_obj.username}}">Unfriend</a><br>
-				Action taken by: {{relation.action_username}} |
-				<a href="/user/{{username_obj.username}}/message">Message</a>
-
+				Action taken by: {{relation.action_username}}
             {% elif relation.status == 'Rejected' %}
 				You are visiting {{ username_obj.username }}!! email: {{ username_obj.email}}. <br>
 				Current status: {{relation.status}} <a href="/user/add/{{username_obj.username}}">Add Friend</a><br>
@@ -40,37 +38,27 @@
         {% else %}
         	Hello {{ username_obj.username }}!! Your email: {{ username_obj.email}}
         {% endif %}
-    </p>	
+    </p>
     <hr>
-    <B>Friends</B>
-    {% for frnd in frndlist1 %}
-    	{% if frnd.status == 'Accepted' %}
-    		<li><a href="/user/{{ frnd.second_username}}">{{frnd.second_username}}</a></li>
-    	{% endif %}
-    {% endfor %}
-    {% for frnd in frndlist2 %}
-		{% if frnd.status == 'Accepted' %}
-			<li><a href="/user/{{ frnd.first_username}}">{{ frnd.first_username}}</a></li>
-		{% endif %}
-    {% endfor %}
-    
-    <hr>
-    <B>Confirm friend request</B>
-    {% if relation == None %}
-	    {% for frnd in frndlist2 %}
-			{% if frnd.status == 'pending' %}
-				<li><a href="/user/{{ frnd.first_username}}">{{ frnd.first_username}}</a>
-					| <a href="/user/add/{{frnd.first_username}}">Confirm</a>
-					| <a href="/user/reject/{{frnd.first_username}}">Reject</a>
-
-				</li>
-			{% endif %}
-	    {% endfor %}
-	{% endif %}
-
-	<hr>
 	You shared message with {{username_obj.username}}
 	{% for msg in msg_all %}
 		<p>{{msg.first_username}} -> {{msg.second_username}} -> {{msg.timestamp}}<br> {{msg.chat}}</p>
 	{% endfor %}
+    <form action="/user/{{username_obj.username}}/message" method="POST" name="message">
+        {{ form.hidden_tag()}}
+        <p>
+            <div >
+                {{form.message.label()}}
+                <br>
+                {{form.message()}}
+                {% for error in form.message.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+
+        </p>
+        <p>
+            <input type="submit" value="message" name="Message">
+        </p>
+    </form>
 {% endblock %}
