@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, request, session
+from flask import render_template, flash, redirect, request, session, jsonify
 from app import app, db
 from .forms import LoginForm, RegistrationForm, MessageForm
 import models
@@ -218,7 +218,8 @@ def message(user_name):
     frndlist2 = user_obj.friends_s
     frnd_all = frndlist1.union(frndlist2).order_by(models.Friend.timestamp)
 
-    message_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(30))
+    #message_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(30))
+    message_id = random.randint(1000000,9999999)
     if form.validate_on_submit() and request.method == 'POST':
         msg = models.Message(id=message_id,first_username=username, second_username=user_name, chat=form.message.data,
                              timestamp=datetime.datetime.utcnow(), chat_by=username)
@@ -240,7 +241,61 @@ def message(user_name):
                            form=form)
 
 
+@app.route('/user/<frnd>/message/delete/<id>')
+def delete(frnd,id):
+    msg = models.Message.query.get(id)
+    try:
+        if session['username'] == msg.first_username:
+            msg.read_permission_first_user = False
+        else:
+            msg.read_permission_second_user = False
+        db.session.commit()
+        return redirect('/user/%s/message'%frnd)
+    except:
+        return redirect('/user/%s/message'%frnd)
 
+@app.route('/user/message/delete/<id>')
+def delete_from_user(id):
+    msg = models.Message.query.get(id)
+    try:
+        if session['username'] == msg.first_username:
+            msg.read_permission_first_user = False
+        else:
+            msg.read_permission_second_user = False
+        db.session.commit()
+        return redirect('/user')
+    except:
+        return redirect('/user')
+
+
+@app.route('/user/<frnd>/delete/<id>')
+def delete_from_user_frnd(frnd,id):
+    msg = models.Message.query.get(id)
+    try:
+        if session['username'] == msg.first_username:
+            msg.read_permission_first_user = False
+        else:
+            msg.read_permission_second_user = False
+        db.session.commit()
+        return redirect('/user/%s'%frnd)
+    except:
+        return redirect('/user/%s'%frnd)
+
+
+@app.route('/background_process')
+def background_process():
+    try:
+        message_bit = request.args.get('a')
+        from_user = request.args.get('from_user')
+        to_user = request.args.get('to_user')
+        print from_user,"::",to_user,">>>",message_bit
+        return jsonify(result="You are wise!")
+    except Exception as e:
+        print e
+
+@app.route('/interactive/')
+def interactive():
+    return render_template('temprary.html')
 
 
 

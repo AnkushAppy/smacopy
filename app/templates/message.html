@@ -43,9 +43,11 @@
     <hr>
 	You shared message with {{username_obj.username}}
 	{% for msg in msg_all %}
-		<p>{{msg.first_username}} -> {{msg.second_username}} -> {{msg.timestamp}}<br> {{msg.chat}} </p>
+    {% if (msg.first_username == username and msg.read_permission_first_user == True)
+or (msg.second_username == username and msg.read_permission_second_user == True)%}
+		<p>{{msg.first_username}} -> {{msg.second_username}} -> {{msg.timestamp}} <a href="/user/{{username_obj.username}}/message/delete/{{msg.id}}">delete</a><br> {{msg.chat}} </p>
         <br>
-        <a href="/"></a>
+{% endif %}
 	{% endfor %}
     <form action="/user/{{username_obj.username}}/message" method="POST" name="message">
         {{ form.hidden_tag()}}

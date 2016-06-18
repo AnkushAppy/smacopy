@@ -70,8 +70,26 @@
 	{% endif %}
 
 	<hr>
+{% if username_obj.username == username%}
+	<B>You shared messages with all friends</B>
+	{% for msg in msg_all %}
+		{% if (msg.first_username == username and msg.read_permission_first_user == True)
+or (msg.second_username == username and msg.read_permission_second_user == True)%}
+		<p>{{msg.first_username}} -> {{msg.second_username}} -> {{msg.timestamp}}
+			<a href="/user/message/delete/{{msg.id}}">delete</a><br> {{msg.chat}}</p>
+
+		{% endif %}
+	{% endfor %}
+{% else %}
 	<B>You shared message with {{username_obj.username}}</B>
 	{% for msg in msg_all %}
-		<p>{{msg.first_username}} -> {{msg.second_username}} -> {{msg.timestamp}}<br> {{msg.chat}}</p>
+		{% if (msg.first_username == username and msg.read_permission_first_user == True)
+or (msg.second_username == username and msg.read_permission_second_user == True)%}
+		<p>{{msg.first_username}} -> {{msg.second_username}} -> {{msg.timestamp}}
+			<a href="/user/{{username_obj.username}}/delete/{{msg.id}}">delete</a><br> {{msg.chat}}</p>
+
+		{% endif %}
 	{% endfor %}
+{% endif %}
+
 {% endblock %}

@@ -1,7 +1,7 @@
 #!flask/bin/python
 import os
 import unittest
-import datetime
+import datetime, random
 
 from config import basedir
 from app import app, db
@@ -98,9 +98,10 @@ class TestCase(unittest.TestCase):
         db.session.commit()
         status = 'Accepted'
         time = datetime.datetime.utcnow()
-        m1 = Message(first_username=u1_name,second_username=u2_name,chat='Hello',timestamp=time,chat_by=u1_name)
-        m2 = Message(first_username=u1_name,second_username=u2_name,chat='Hello',timestamp=time,chat_by=u1_name)
-        m3 = Message(first_username=u2_name,second_username=u1_name,chat='Hello',timestamp=time,chat_by=u2_name)
+        message_id = random.randint(1000000, 9999999)
+        m1 = Message(id=random.randint(1000000, 9999999),first_username=u1_name,second_username=u2_name,chat='Hello',timestamp=time,chat_by=u1_name)
+        m2 = Message(id=random.randint(1000000, 9999999),first_username=u1_name,second_username=u2_name,chat='Hello',timestamp=time,chat_by=u1_name)
+        m3 = Message(id=random.randint(1000000, 9999999),first_username=u2_name,second_username=u1_name,chat='Hello',timestamp=time,chat_by=u2_name)
         db.session.add(m1)
         db.session.add(m2)
         db.session.add(m3)

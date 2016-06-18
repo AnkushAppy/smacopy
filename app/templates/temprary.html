@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+
+ <script>
+       $(function() {
+    var submit_form = function(e) {
+      $.getJSON('/background_process', {
+        a: $('input[name="a"]').val(),
+          from_user:'John',
+          to_user:'ethan'
+      }, function(data) {
+        $('#result').text(data.result);
+        $('input[name=a]').focus().select();
+      });
+      return false;
+    };
+    $('a#message').bind('click', submit_form);
+
+    $('input[name=a]').focus();
+  });
+ </script>
+<h1>jQuery Example</h1>
+<p>
+  <input type="text"  name="a">
+<p><a href=# id="message">Message</a>
+    <span id="result">?</span>
+</div>
+
+{% endblock %}
