@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, request, session
 from app import app, db
 from .forms import LoginForm, RegistrationForm, MessageForm
 import models
-import datetime
+import datetime, string, random
 from datetime import timedelta
 
 
@@ -217,8 +217,10 @@ def message(user_name):
     frndlist1 = user_obj.friends_f
     frndlist2 = user_obj.friends_s
     frnd_all = frndlist1.union(frndlist2).order_by(models.Friend.timestamp)
+
+    message_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(30))
     if form.validate_on_submit() and request.method == 'POST':
-        msg = models.Message(first_username=username, second_username=user_name, chat=form.message.data,
+        msg = models.Message(id=message_id,first_username=username, second_username=user_name, chat=form.message.data,
                              timestamp=datetime.datetime.utcnow(), chat_by=username)
         db.session.add(msg)
         db.session.commit()

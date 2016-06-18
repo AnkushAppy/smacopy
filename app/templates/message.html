@@ -43,7 +43,9 @@
     <hr>
 	You shared message with {{username_obj.username}}
 	{% for msg in msg_all %}
-		<p>{{msg.first_username}} -> {{msg.second_username}} -> {{msg.timestamp}}<br> {{msg.chat}}</p>
+		<p>{{msg.first_username}} -> {{msg.second_username}} -> {{msg.timestamp}}<br> {{msg.chat}} </p>
+        <br>
+        <a href="/"></a>
 	{% endfor %}
     <form action="/user/{{username_obj.username}}/message" method="POST" name="message">
         {{ form.hidden_tag()}}
