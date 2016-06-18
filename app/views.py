@@ -18,6 +18,7 @@ def login():
     title = 'Login page'
     form = LoginForm()
     if form.validate_on_submit() and request.method == 'POST':
+        error=None
         #flash('Login requested for username = "%s", remember me="%s"')%(form.username.data,str(form.remember_me.data))
         username = form.username.data
         username = username.strip()
@@ -25,14 +26,16 @@ def login():
         username_obj = models.User.query.get(username)
 
         if not username_obj:
+            error = "* Username or password are incorrect."
             return render_template('login.html',
                                    title=title,
-                                   form=form)
+                                   form=form, error=error)
 
         if username_obj.password != password:
+            error = "Username or passsword are incorrect."
             return render_template('login.html',
                                    title=title,
-                                   form=form)
+                                   form=form, error=error)
 
         if 'username' not in session:
             session['username'] = username
@@ -109,13 +112,14 @@ def profile(user_name):
             frndlist2 = username_obj.friends_s
             msg_obj1 = models.Message.query.filter_by(first_username=username,second_username=user_name)
             msg_obj2 = models.Message.query.filter_by(first_username=user_name,second_username=username)
+            msg_all = msg_obj1.union(msg_obj2).order_by(models.Message.timestamp).limit(10)
             return render_template('user.html',
                                    title=title,
                                    username_obj = username_obj,
                                    frndlist1 = frndlist1,
                                    frndlist2 = frndlist2,
                                    relation=relation,
-                                   username=username,msg_obj2=msg_obj2,msg_obj1=msg_obj1)
+                                   username=username,msg_obj2=msg_obj2,msg_obj1=msg_obj1,msg_all=msg_all)
         else:
             new = 'New'
             username_obj = models.User.query.get(user_name)
@@ -201,6 +205,11 @@ def message(user_name):
     if user_name == username:
         redirect('/user')
 
+    relation = models.Friend.query.filter_by(first_username=username,
+                                             second_username=user_name).first() \
+                   or models.Friend.query.filter_by(first_username=user_name,
+                                            second_username=username).first()
+
     msg_obj1 = models.Message.query.filter_by(first_username=username, second_username=user_name)
     msg_obj2 = models.Message.query.filter_by(first_username=user_name, second_username=username)
     msg_all = msg_obj1.union(msg_obj2).order_by(models.Message.timestamp).limit(10)
@@ -218,14 +227,14 @@ def message(user_name):
                                username_obj=username_obj,
                                username=username,
                                msg_all=msg_all,
-                               relation=None,
-                               form=form)
+                               relation=relation,
+                               form=form,)
 
     return render_template('message.html',
                            username_obj=username_obj,
                            username=username,
                            msg_all=msg_all,
-                           relation=None,
+                           relation=relation,
                            form=form)
 
 

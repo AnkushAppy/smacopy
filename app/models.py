@@ -24,6 +24,18 @@ class User(db.Model):
     def __repr__(self):
         return '<User: %s Email: %s>' % (self.username,self.email)
 
+    @staticmethod
+    def unique_user(user_name):
+        if User.query.filter_by(username=user_name).first() is None:
+            return True
+        return False
+
+    @staticmethod
+    def unique_email(user_email):
+        if User.query.filter_by(email=user_email).first() is None:
+            return True
+        return False
+
 
 class Friend(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -37,7 +49,23 @@ class Friend(db.Model):
     def __repr__(self):
         return '<%s and %s have friendship status %s >'%(self.first_username,self.second_username,self.status)
 
+    @staticmethod
+    def are_friends(user1,user2):
+        if Friend.query.filter_by(first_username=user1,second_username=user2,status='Accepted').first() \
+                or Friend.query.filter_by(first_username=user2, second_username=user1, status='Accepted').first():
+            return True
+        return False
 
+    @staticmethod
+    def count_friends(user1):
+        frndlist1 = Friend.query.filter_by(first_username=user1, status='Accepted')
+        frndlist2 = Friend.query.filter_by(second_username=user1, status='Accepted')
+        frndlist = frndlist1.union(frndlist2)
+        count = 0
+        for f in frndlist:
+            count += 1
+
+        return count
 #p = models.Friend(id=1,first_username='john',second_username='cat',status='pending',timestamp=datetime.datetime.utcnow(),action_user='john')
 
 class Message(db.Model):
@@ -55,6 +83,23 @@ class Message(db.Model):
             return '<%s messaged %s : \" %s \">'%(self.chat_by, self.first_username, self.chat)
         return '<%s messaged %s : \" %s \">' % (self.chat_by, self.second_username, self.chat)
 
+
+    @staticmethod
+    def message_user(user1,user2):
+        if Message.query.filter_by(first_username=user1,second_username=user2).first():
+            return True
+        return False
+
+    @staticmethod
+    def count_messages(user1,user2):
+        msg1 = Message.query.filter_by(first_username=user1,second_username=user2)
+        msg2 = Message.query.filter_by(first_username=user2,second_username=user1)
+        msg_all = msg1.union(msg2).order_by(Message.timestamp)
+
+        count = 0
+        for m in msg_all:
+            count += 1
+        return count
 
 #msg = models.Message(first_username='ethan',second_username='john',chat='Hi john, how are you',timestamp=datetime.datetime.utcnow(),chat_by='ethan')
 # asd

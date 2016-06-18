@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+<link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" media="screen">
 	<a href="/user" name="Home">
 		Home
 	</a>
@@ -69,7 +70,7 @@
 	{% endif %}
 
 	<hr>
-	You shared message with {{username_obj.username}}
+	<B>You shared message with {{username_obj.username}}</B>
 	{% for msg in msg_all %}
 		<p>{{msg.first_username}} -> {{msg.second_username}} -> {{msg.timestamp}}<br> {{msg.chat}}</p>
 	{% endfor %}
