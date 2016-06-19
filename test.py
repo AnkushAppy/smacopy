@@ -7,6 +7,7 @@ from config import basedir
 from app import app, db
 from app.models import User, Message, Friend
 
+
 class TestCase(unittest.TestCase):
     def setUp(self):
         app.config['TESTING'] = True
@@ -40,7 +41,8 @@ class TestCase(unittest.TestCase):
             confirm=confirm
         ), follow_redirects=True)
 
-    
+    def profile(self,path):
+        return self.app.get(path, follow_redirects=True)
 
     def test_login_logout(self):
         u = User(username='john',email='john@john.com',password='hello')
@@ -88,14 +90,19 @@ class TestCase(unittest.TestCase):
         assert 'Reject' in rv.data
         assert '/user/add/john' in rv.data
         #friendship got accepted by kim. now both should have name in their friend list
-        f = Friend.query.filter_by(first_username='john',second_username='kim').first()
-        f.status = 'Accepted'
-        db.session.commit()
+        # f = Friend.query.filter_by(first_username='john',second_username='kim').first()
+        # f.status = 'Accepted'
+        # db.session.commit()
+        path = '/user/add/john'
+        rv = self.profile(path)
+        assert '/user/john' in rv.data
         rv = self.logout()
         rv = self.login('john', 'hello')
-        print rv.data
         assert 'Hello john!! Your email: john@john.com' in rv.data
         assert '/user/kim' in rv.data
+        path = '/user/kim'
+        rv = self.profile(path)
+        assert '/user/john' in rv.data
 
 
 
