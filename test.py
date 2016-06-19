@@ -23,7 +23,7 @@ class TestCase(unittest.TestCase):
     def test_empty_db(self):
         rv = self.app.get('/')
         assert b' Hi !! Welcome to social messaging platform' in rv.data
-        print 'Empty db Checked'
+        # print 'Empty db Checked'
 
     def login(self,username, password):
         return self.app.post('/login', data=dict(
@@ -51,27 +51,27 @@ class TestCase(unittest.TestCase):
         db.session.commit()
         rv = self.login('john', 'hello')
         assert 'Hello john!! Your email: john@john.com' in rv.data
-        print 'Login with right credentials, Logged in Checked'
+        # print 'Login with right credentials, Logged in Checked'
         rv = self.logout()
         assert 'Please Enter Login Credentials' in rv.data
-        print 'Logout Checked'
+        # print 'Logout Checked'
         rv = self.login('invalid_user', 'hello')
         assert 'Username or password are incorrect.' in rv.data
-        print 'Login failed with wrong username'
+        # print 'Login failed with wrong username'
         rv = self.login('john', 'invalid password')
         assert 'Please Enter Login Credentials' in rv.data
-        print 'Login failed with wrong password'
+        # print 'Login failed with wrong password'
         rv = self.login('john','')
         assert 'This field is required.' in rv.data
-        print 'Login failed with empty password field, error checked'
+        # print 'Login failed with empty password field, error checked'
         rv = self.login('','hello')
         assert 'This field is required.' in rv.data
-        print 'Login failed with empty username field, error checked'
+        # print 'Login failed with empty username field, error checked'
 
     def test_register(self):
         rv = self.register('john','john@john.com','hello','hello')
         assert 'Hello john!! Your email: john@john.com' in rv.data
-        print 'Registration with all good data done.'
+        # print 'Registration with all good data done.'
         rv = self.logout()
         assert 'Please Enter Login Credentials' in rv.data
         rv = self.register('', 'johnjohn.com', 'hell', 'helloX')
@@ -81,7 +81,7 @@ class TestCase(unittest.TestCase):
         assert 'Field must be between 5 and 64 characters long.' in rv.data
         rv = self.register('%^&', 'johnjohn.com', 'hell', 'helloX')
         assert 'Username should be at least one word and can only contain Alphabets, Numbers and underscores' in rv.data
-        print 'Caught all sorts of error for sign up page'
+        # print 'Caught all sorts of error for sign up page'
 
     def test_user_friend(self):
         u = User(username='john', email='john@john.com', password='hello')
@@ -101,12 +101,12 @@ class TestCase(unittest.TestCase):
         assert 'Hello kim!! Your email: kim@kim.com' in rv.data
         assert 'Reject' in rv.data
         assert '/user/add/john' in rv.data
-        print 'Request friendship, reject, confirm checked'
+        # print 'Request friendship, reject, confirm checked'
     # friendship got accepted by kim. now both should have name in their friend list
         path = '/user/add/john'
         rv = self.profile(path)
         assert '/user/john' in rv.data
-        print 'confirm friend link working'
+        # print 'confirm friend link working'
         rv = self.logout()
         rv = self.login('john', 'hello')
         assert 'Hello john!! Your email: john@john.com' in rv.data
@@ -114,11 +114,13 @@ class TestCase(unittest.TestCase):
         path = '/user/kim'
         rv = self.profile(path)
         assert '/user/john' in rv.data
-        print 'friend profile link working'
-        path = '/user/unfriend/john'
+    #    print rv.data
+    #   print 'friend profile link working'
+        path = '/user/unfriend/kim'
         rv = self.profile(path)
         assert 'Add Friend' in rv.data
-        path = '/user/add/john'
+    #   print rv.data
+        path = '/user/add/kim'
         rv = self.profile(path)
         assert 'Current status: pending' in rv.data
 
@@ -127,6 +129,22 @@ class TestCase(unittest.TestCase):
         v = User(username='kim', email='kim@kim.com', password='hello')
         f = Friend(first_username='john', second_username='kim', status='Accepted',
                    timestamp=datetime.datetime.utcnow(), action_username='john')
+        m1 = Message(id=random.randint(1000000, 9999999), first_username='john',
+                     second_username='kim', chat='Hello kim, :)',
+                     timestamp=datetime.datetime.utcnow(), chat_by='john')
+        db.session.add(u)
+        db.session.add(v)
+        db.session.add(f)
+        db.session.add(m1)
+        db.session.commit()
+        self.login('john','hello')
+        self.profile('/user/kim')
+        rv = self.profile('/user/kim/message')
+        assert 'Hello kim, :)' in rv.data
+    #    print rv.data
+
+
+
 
 
 # model testcases
@@ -155,7 +173,7 @@ class TestCase(unittest.TestCase):
         db.session.commit()
         self.assertFalse(User.unique_email(u3_email))
         u_0 = User.query.filter_by(email=u3_email).first()
-        print u_0.email
+    #   print u_0.email
 
     def test_are_friends(self):
         u1_name = 'john'
