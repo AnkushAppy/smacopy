@@ -41,7 +41,9 @@
         {% endif %}
     </p>
     <hr>
+    <p>
 	You shared message with {{username_obj.username}}
+        </p>
 	{% for msg in msg_all %}
     {% if (msg.first_username == username and msg.read_permission_first_user == True)
 or (msg.second_username == username and msg.read_permission_second_user == True)%}
@@ -49,6 +51,8 @@ or (msg.second_username == username and msg.read_permission_second_user == True)
         <br>
 {% endif %}
 	{% endfor %}
+
+{% if relation.status == 'Accepted' %}
     <form action="/user/{{username_obj.username}}/message" method="POST" name="message">
         {{ form.hidden_tag()}}
         <p>
@@ -66,4 +70,5 @@ or (msg.second_username == username and msg.read_permission_second_user == True)
             <input type="submit" value="message" name="Message">
         </p>
     </form>
+{% endif %}
 {% endblock %}

@@ -122,6 +122,12 @@ class TestCase(unittest.TestCase):
         rv = self.profile(path)
         assert 'Current status: pending' in rv.data
 
+    def test_message(self):
+        u = User(username='john', email='john@john.com', password='hello')
+        v = User(username='kim', email='kim@kim.com', password='hello')
+        f = Friend(first_username='john', second_username='kim', status='Accepted',
+                   timestamp=datetime.datetime.utcnow(), action_username='john')
+
 
 # model testcases
     def test_unique_user(self):
