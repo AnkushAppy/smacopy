@@ -32,7 +32,7 @@ def login():
                                    form=form, error=error)
 
         if username_obj.password != password:
-            error = "Username or passsword are incorrect."
+            error = "* Username or passsword are incorrect."
             return render_template('login.html',
                                    title=title,
                                    form=form, error=error)

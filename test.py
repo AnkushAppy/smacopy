@@ -19,114 +19,179 @@ class TestCase(unittest.TestCase):
         db.session.remove()
         db.drop_all()
 
-    def test_unique_user(self):
-        u1 = 'john'
-        u2 = 'new_name'
-        self.assertTrue(User.unique_user(u1))
-        self.assertTrue(User.unique_user(u2))
-        u3_name = 'another_user'
-        u3_email = 'another_user@another_user.com'
-        u3 = User(username=u3_name,email=u3_email,password='passw')
-        self.assertTrue(User.unique_user(u3_name))
-        db.session.add(u3)
-        db.session.commit()
-        self.assertFalse(User.unique_user(u3_name))
+    def test_empty_db(self):
+        rv = self.app.get('/')
+        assert b' Hi !! Welcome to social messaging platform' in rv.data
 
-    def test_unique_email(self):
-        u1 = 'john@john.com'
-        u2 = 'new_name@new_name.com'
-        self.assertTrue(User.unique_email(u1))
-        self.assertTrue(User.unique_email(u2))
-        u3_name = 'another_user'
-        u3_email = 'another_user@another_user.com'
-        u3 = User(username=u3_name,email=u3_email,password='hello')
-        db.session.add(u3)
-        db.session.commit()
-        self.assertFalse(User.unique_email(u3_email))
-        u_0 = User.query.filter_by(email=u3_email).first()
-        print u_0.email
+    def login(self,username, password):
+        return self.app.post('/login', data=dict(
+            username=username,
+            password=password
+        ), follow_redirects=True)
 
-    def test_are_friends(self):
-        u1_name = 'john'
-        u1_email = 'john@john.com'
-        u2_name = 'alex'
-        u2_email = 'alex@alex.com'
-        u1 = User(username=u1_name,email=u1_email,password='hello')
-        u2 = User(username=u2_name, email=u2_email, password='hello')
-        db.session.add(u1)
-        db.session.add(u2)
-        db.session.commit()
-        f = Friend(first_username=u1_name,
-                   second_username=u2_name,
-                   status='Accepted',timestamp=datetime.datetime.utcnow(),action_username=u1_name)
-        db.session.add(f)
-        db.session.commit()
-        self.assertTrue(Friend.are_friends(u1_name,u2_name))
+    def logout(self):
+        return self.app.get('/logout', follow_redirects=True)
 
-    def test_count_friends(self):
-        u1_name = 'john'
-        u1_email = 'john@john.com'
-        u2_name = 'alex'
-        u2_email = 'alex@alex.com'
-        u3_name = 'cat'
-        u3_email = 'cat@cat.com'
-        u1 = User(username=u1_name, email=u1_email, password='hello')
-        u2 = User(username=u2_name, email=u2_email, password='hello')
-        u3 = User(username=u3_name, email=u3_email, password='hello')
-        db.session.add(u1)
-        db.session.add(u2)
-        db.session.add(u3)
-        db.session.commit()
-        status = 'Accepted'
-        time = datetime.datetime.utcnow()
-        f1 = Friend(first_username=u1_name,second_username=u2_name,status=status,timestamp=time,action_username=u1_name)
-        f2 = Friend(first_username=u1_name, second_username=u3_name, status=status, timestamp=time,action_username=u3_name)
-        db.session.add(f1)
-        db.session.add(f2)
-        db.session.commit()
-        self.assertEqual(Friend.count_friends(u1_name),2)
+    def register(self,username,email,password,confirm):
+        return self.app.post('/register', data=dict(
+            username=username,
+            email=email,
+            password=password,
+            confirm=confirm
+        ), follow_redirects=True)
 
-    def test_count_messages(self):
-        u1_name = 'john'
-        u1_email = 'john@john.com'
-        u2_name = 'alex'
-        u2_email = 'alex@alex.com'
-        u1 = User(username=u1_name, email=u1_email, password='hello')
-        u2 = User(username=u2_name, email=u2_email, password='hello')
-        db.session.add(u1)
-        db.session.add(u2)
+    def test_login_logout(self):
+        u = User(username='john',email='john@john.com',password='hello')
+        db.session.add(u)
         db.session.commit()
-        status = 'Accepted'
-        time = datetime.datetime.utcnow()
-        message_id = random.randint(1000000, 9999999)
-        m1 = Message(id=random.randint(1000000, 9999999),first_username=u1_name,second_username=u2_name,chat='Hello',timestamp=time,chat_by=u1_name)
-        m2 = Message(id=random.randint(1000000, 9999999),first_username=u1_name,second_username=u2_name,chat='Hello',timestamp=time,chat_by=u1_name)
-        m3 = Message(id=random.randint(1000000, 9999999),first_username=u2_name,second_username=u1_name,chat='Hello',timestamp=time,chat_by=u2_name)
-        db.session.add(m1)
-        db.session.add(m2)
-        db.session.add(m3)
-        db.session.commit()
-        self.assertEqual(Message.count_messages(u1_name,u2_name), 3)
+        rv = self.login('john', 'hello')
+        assert 'Hello john!! Your email: john@john.com' in rv.data
+        rv = self.logout()
+        assert 'Please Enter Login Credentials' in rv.data
+        rv = self.login('invalid_user', 'hello')
+        assert 'Username or password are incorrect.' in rv.data
+        rv = self.login('john', 'invalid password')
+        assert 'Please Enter Login Credentials' in rv.data
+        rv = self.login('john','')
+        assert 'This field is required.' in rv.data
+        rv = self.login('','hello')
+        assert 'This field is required.' in rv.data
+
+    def test_register(self):
+        rv = self.register('john','john@john.com','hello','hello')
+        assert 'Hello john!! Your email: john@john.com' in rv.data
+        rv = self.logout()
+        assert 'Please Enter Login Credentials' in rv.data
+        rv = self.register('', 'johnjohn.com', 'hell', 'helloX')
+        assert 'This field is required.' in rv.data
+        assert 'Invalid email address.' in rv.data
+        assert 'Password must match' in rv.data
+        assert 'Field must be between 5 and 64 characters long.' in rv.data
+
+
+
+
+
+    # def test_unique_user(self):
+    #     u1 = 'john'
+    #     u2 = 'new_name'
+    #     self.assertTrue(User.unique_user(u1))
+    #     self.assertTrue(User.unique_user(u2))
+    #     u3_name = 'another_user'
+    #     u3_email = 'another_user@another_user.com'
+    #     u3 = User(username=u3_name,email=u3_email,password='passw')
+    #     self.assertTrue(User.unique_user(u3_name))
+    #     db.session.add(u3)
+    #     db.session.commit()
+    #     self.assertFalse(User.unique_user(u3_name))
+    #
+    # def test_unique_email(self):
+    #     u1 = 'john@john.com'
+    #     u2 = 'new_name@new_name.com'
+    #     self.assertTrue(User.unique_email(u1))
+    #     self.assertTrue(User.unique_email(u2))
+    #     u3_name = 'another_user'
+    #     u3_email = 'another_user@another_user.com'
+    #     u3 = User(username=u3_name,email=u3_email,password='hello')
+    #     db.session.add(u3)
+    #     db.session.commit()
+    #     self.assertFalse(User.unique_email(u3_email))
+    #     u_0 = User.query.filter_by(email=u3_email).first()
+    #     print u_0.email
+    #
+    # def test_are_friends(self):
+    #     u1_name = 'john'
+    #     u1_email = 'john@john.com'
+    #     u2_name = 'alex'
+    #     u2_email = 'alex@alex.com'
+    #     u1 = User(username=u1_name,email=u1_email,password='hello')
+    #     u2 = User(username=u2_name, email=u2_email, password='hello')
+    #     db.session.add(u1)
+    #     db.session.add(u2)
+    #     db.session.commit()
+    #     f = Friend(first_username=u1_name,
+    #                second_username=u2_name,
+    #                status='Accepted',timestamp=datetime.datetime.utcnow(),action_username=u1_name)
+    #     db.session.add(f)
+    #     db.session.commit()
+    #     self.assertTrue(Friend.are_friends(u1_name,u2_name))
+    #
+    # def test_count_friends(self):
+    #     u1_name = 'john'
+    #     u1_email = 'john@john.com'
+    #     u2_name = 'alex'
+    #     u2_email = 'alex@alex.com'
+    #     u3_name = 'cat'
+    #     u3_email = 'cat@cat.com'
+    #     u1 = User(username=u1_name, email=u1_email, password='hello')
+    #     u2 = User(username=u2_name, email=u2_email, password='hello')
+    #     u3 = User(username=u3_name, email=u3_email, password='hello')
+    #     db.session.add(u1)
+    #     db.session.add(u2)
+    #     db.session.add(u3)
+    #     db.session.commit()
+    #     status = 'Accepted'
+    #     time = datetime.datetime.utcnow()
+    #     f1 = Friend(first_username=u1_name,second_username=u2_name,status=status,timestamp=time,action_username=u1_name)
+    #     f2 = Friend(first_username=u1_name, second_username=u3_name, status=status, timestamp=time,action_username=u3_name)
+    #     db.session.add(f1)
+    #     db.session.add(f2)
+    #     db.session.commit()
+    #     self.assertEqual(Friend.count_friends(u1_name),2)
+    #
+    # def test_count_messages(self):
+    #     u1_name = 'john'
+    #     u1_email = 'john@john.com'
+    #     u2_name = 'alex'
+    #     u2_email = 'alex@alex.com'
+    #     u1 = User(username=u1_name, email=u1_email, password='hello')
+    #     u2 = User(username=u2_name, email=u2_email, password='hello')
+    #     db.session.add(u1)
+    #     db.session.add(u2)
+    #     db.session.commit()
+    #     status = 'Accepted'
+    #     time = datetime.datetime.utcnow()
+    #     message_id = random.randint(1000000, 9999999)
+    #     m1 = Message(id=random.randint(1000000, 9999999),first_username=u1_name,second_username=u2_name,chat='Hello',timestamp=time,chat_by=u1_name)
+    #     m2 = Message(id=random.randint(1000000, 9999999),first_username=u1_name,second_username=u2_name,chat='Hello',timestamp=time,chat_by=u1_name)
+    #     m3 = Message(id=random.randint(1000000, 9999999),first_username=u2_name,second_username=u1_name,chat='Hello',timestamp=time,chat_by=u2_name)
+    #     db.session.add(m1)
+    #     db.session.add(m2)
+    #     db.session.add(m3)
+    #     db.session.commit()
+    #     self.assertEqual(Message.count_messages(u1_name,u2_name), 3)
+    #
+    # def test_can_user_read_message(self):
+    #     u1_name = 'john'
+    #     u1_email = 'john@john.com'
+    #     u2_name = 'alex'
+    #     u2_email = 'alex@alex.com'
+    #     u1 = User(username=u1_name, email=u1_email, password='hello')
+    #     u2 = User(username=u2_name, email=u2_email, password='hello')
+    #     db.session.add(u1)
+    #     db.session.add(u2)
+    #     db.session.commit()
+    #     status = 'Accepted'
+    #     time = datetime.datetime.utcnow()
+    #     m1 = Message(id=random.randint(1000000, 9999999), first_username=u1_name, second_username=u2_name, chat='Hello',
+    #                  timestamp=time, chat_by=u1_name)
+    #     db.session.add(m1)
+    #     db.session.commit()
+    #     # john deletes a message with alex
+    #     msg = Message.query.filter_by(first_username='john',second_username='alex').first()
+    #     msg.read_permission_first_user = False
+    #     db.session.commit()
+    #     self.assertFalse(Message.can_user_read_message(u1_name,msg.id))
 
 
 if __name__=='__main__':
     unittest.main()
+
 #
 # @staticmethod
-# def are_friends(self, user1, user2):
-#     if Friend.query.filter_by(first_username=user1, second_username=user2, status='Accepted').first() \
-#             or Friend.query.filter_by(first_username=user2, second_username=user1, status='Accepted').first():
-#         return True
-#     return False
-#
-#
-# @staticmethod
-# def count_friends(self, user1, user2):
-#     frndlist1 = Friend.query.filter_by(first_username=user1, second_username=user2, status='Accepted')
-#     frndlist2 = Friend.query.filter_by(first_username=user2, second_username=user1, status='Accepted')
-#     frndlist = frndlist1.union(frndlist2)
-#     count = 0
-#     for f in frndlist:
-#         count += 1
-#
-#     return count
+# def can_user_read_message(user1, msg_id):
+#     msg = Message.query.get(msg_id)
+#     if user1 == msg.first_username:
+#         return msg.read_permission_first_user
+#     else:
+#         return msg.read_permission_second_user

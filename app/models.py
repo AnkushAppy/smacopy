@@ -101,6 +101,14 @@ class Message(db.Model):
             count += 1
         return count
 
+    @staticmethod
+    def can_user_read_message(user1,msg_id):
+        msg = Message.query.get(msg_id)
+        if user1 == msg.first_username:
+            return msg.read_permission_first_user
+        else:
+            return msg.read_permission_second_user
+
 #msg = models.Message(first_username='ethan',second_username='john',chat='Hi john, how are you',timestamp=datetime.datetime.utcnow(),chat_by='ethan')
 # asd
 
