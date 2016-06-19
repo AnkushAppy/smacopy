@@ -40,6 +40,8 @@ class TestCase(unittest.TestCase):
             confirm=confirm
         ), follow_redirects=True)
 
+    
+
     def test_login_logout(self):
         u = User(username='john',email='john@john.com',password='hello')
         db.session.add(u)
@@ -68,10 +70,40 @@ class TestCase(unittest.TestCase):
         assert 'Password must match' in rv.data
         assert 'Field must be between 5 and 64 characters long.' in rv.data
 
+    def test_user_friend(self):
+        u = User(username='john', email='john@john.com', password='hello')
+        v = User(username='kim', email='kim@kim.com', password='hello')
+        f = Friend(first_username='john',second_username='kim',status='pending',timestamp=datetime.datetime.utcnow(),action_username='john')
+        #john have send friend request to kim, kim should confirm now
+        db.session.add(u)
+        db.session.add(v)
+        db.session.add(f)
+        db.session.commit()
+        rv = self.login('john', 'hello')
+        assert 'Hello john!! Your email: john@john.com' in rv.data
+        rv = self.logout()
+        assert 'Please Enter Login Credentials' in rv.data
+        rv = self.login('kim', 'hello')
+        assert 'Hello kim!! Your email: kim@kim.com' in rv.data
+        assert 'Reject' in rv.data
+        assert '/user/add/john' in rv.data
+        #friendship got accepted by kim. now both should have name in their friend list
+        f = Friend.query.filter_by(first_username='john',second_username='kim').first()
+        f.status = 'Accepted'
+        db.session.commit()
+        rv = self.logout()
+        rv = self.login('john', 'hello')
+        print rv.data
+        assert 'Hello john!! Your email: john@john.com' in rv.data
+        assert '/user/kim' in rv.data
 
 
 
 
+
+
+
+    #model testcases
     # def test_unique_user(self):
     #     u1 = 'john'
     #     u2 = 'new_name'
