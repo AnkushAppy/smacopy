@@ -20,3 +20,5 @@ some login details for example, (username,password)->(john,hello),(alex,hello),(
 chmod a+x test.py
 ./test.py
 ```
+
+Very minimal ui and simple functionalities are provided. In future websocketIO, javascript and css have to be added. For now CRUD are done through APIs.
