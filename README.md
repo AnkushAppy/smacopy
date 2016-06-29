@@ -29,7 +29,7 @@ username = db.Column(db.String(64), primary_key=True)
 email = db.Column(db.String(64), index=True, unique=True)
 password = db.Column(db.String(64))
 ```
-Friend table: <first_username, second_username> should be unique.
+Friend table: [first_username, second_username] should be unique.
 ```sh
 Friend:
 id = db.Column(db.Integer, primary_key=True)
@@ -51,13 +51,13 @@ chat_by = db.Column(db.String(64), db.ForeignKey(User.username))
 read_permission_first_user = db.Column(db.Boolean, default=True)
 read_permission_second_user = db.Column(db.Boolean, default=True)
 ```
-All foreign key in Friend and Message table refering to username of User table. Accordingly relation was created in User class in models. flask_sqlalchemy is used as ORM over sqlite3 as SQL database. Syntax above are sqlalchamey's.
+All foreign key in Friend and Message table refering to username of User table. Accordingly relations are created in User class in models. flask_sqlalchemy is used as ORM over sqlite3 as SQL database. Syntax above are sqlalchamey's.
 
 
-####To run the testcases, we need to run test.py file which is in root dir
+####To run the testcases, we need to run test.py file which is in root dir. Test are made for APIs and models. More test are yet to be written.
 ```sh
 chmod a+x test.py
 ./test.py
 ```
 
-Very minimal ui and simple functionalities are provided. In future websocketIO, javascript and css have to be added. For now CRUD are done through APIs.
+Note: Very minimal ui and simple functionalities are provided. In future websocketIO, javascript and css have to be added. For now CRUD are done through APIs.
