@@ -1,4 +1,8 @@
 # social messaging application
+####Purpose: A messaging app where users can interact with other user. Many functionalities should be provided like send friend request, confirm, reject, block etc. User should be able to chat. Many functionalities should be provided like delete chat, multiple user chat, sorted by time, user online status etc. 
+
+####Tools: refer requirement.txt
+
 
 ####Instruction to run the application, we will start from clone repo
 ```sh
