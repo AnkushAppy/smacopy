@@ -54,7 +54,8 @@ read_permission_second_user = db.Column(db.Boolean, default=True)
 All foreign key in Friend and Message table refering to username of User table. Accordingly relations are created in User class in models. flask_sqlalchemy is used as ORM over sqlite3 as SQL database. Syntax above are sqlalchamey's.
 
 
-####To run the testcases, we need to run test.py file which is in root dir. Test are made for APIs and models. More test are yet to be written.
+####Test
+To run the testcases, we need to run test.py file which is in root dir. Test are made for APIs and models. More test are yet to be written.
 ```sh
 chmod a+x test.py
 ./test.py
